@@ -35,8 +35,12 @@ unless ( defined($autoflopdir) ) {
 (-f $dvd0) or die "$dvd0 DVD file not found.";
 looks_like_number($num) or die "$num should be a number.";
 my $vmname = "myvm$num";
-my $dir = "/Volumes/MacHD3/vmz/$vmname.vmwarevm";
-die if (-e $dir);
+my $dest = $ENV{"HOME"} . "/Documents/Virtual Machines.localized";
+my $dir = "$dest/$vmname.vmwarevm";
+if (-e $dir) {
+  print STDERR "$dir\nalready exists. Delete it manually if it's invalid.\n";
+  exit 1;
+}
 
 print("Making $vmname\n");
 make_path($dir) or die;

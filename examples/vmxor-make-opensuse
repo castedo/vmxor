@@ -1,3 +1,3 @@
 ../vmxor-make $1 \
     --os opensuse \
-    --dvd0 /Volumes/MacHD1/InstallRepository/openSUSE-13.1-DVD-i586.iso
+    --dvd0 ~/.vmxor-dvds/openSUSE-13.1-DVD-i586.iso
