@@ -5,8 +5,9 @@ use Getopt::Long;
 use File::Basename;
 use File::Path qw(make_path);
 use File::Copy;
+use FindBin;
 
-# return the last byte of the IP address for hostname
+# return the last byte of the IP address for hostname from /etc/hosts
 sub get_ip_byte {
   my ($hostname) = @_;
 
@@ -14,15 +15,12 @@ sub get_ip_byte {
   open(HOSTS, '<', '/etc/hosts') or die "Can't open /etc/hosts: $!";
   my @lines = <HOSTS>;
   close(HOSTS);
-  foreach (@lines) {
-    if (/$regex/) {
-      return $1;
-    }
-  }
+  foreach (@lines) { if (/$regex/) { return $1; } }
   print STDERR "Unable to find IP address in /etc/hosts for $hostname.\n";
   exit 1;
 }
 
+# make a floppy disk image file
 sub make_floppy {
   my ($srcdir, $dest) = @_;
 
@@ -38,25 +36,50 @@ sub make_floppy {
   0 == system("hdiutil detach $dev > /dev/null") or die;
 }
 
+sub template_substitute {
+  my ($infilepath, $outfilepath, $values) = @_;
+
+  open(my $infh, '<', $infilepath) or return;
+  my @lines = <$infh>;
+  close($infh);
+  open(my $outfh, '>', $outfilepath) or return;
+  foreach my $line (@lines) {
+    for my $key (keys %$values) {
+      my $value = $values->{$key};
+      $value = "" unless defined($value);
+      $line =~ s/\${$key}/$value/g;
+    }
+    print $outfh $line;
+  }
+  close($outfh);
+}
+
 my $os = undef;
+my $gb = 8; # size in GB for virtual hard disk
 my $autoflopdir = undef;
 my $dvd0 = undef;
 my $dvd1 = undef;
+my $vmxin = $FindBin::Bin . "/default.vmx.template";
 
 my $results = GetOptions( "os=s"   => \$os,
+                          "gb=s" => \$gb,
                           "flop=s" => \$autoflopdir,
                           "dvd0=s" => \$dvd0,
-                          "dvd1=s" => \$dvd1 );
+                          "dvd1=s" => \$dvd1,
+                          "vmxin=s" => \$vmxin );
 
 my $vmname = shift @ARGV;
 
 unless ( defined($vmname) && defined($dvd0) && defined($os) ) {
-    print STDERR "Make new virtual machine.\n";
-    print STDERR "Usage:\n";
-    print STDERR "\t" . basename($0) . " VMNAME \\\n";
-    print STDERR "\t\t" . "--os {sled11|centos|fedora|opensuse} \\\n";
-    print STDERR "\t\t" . "--dvd0 PATH [--dvd1 PATH] [--flop DIR]\\\n";
-    exit;
+  print STDERR "Make new virtual machine.\n";
+  print STDERR "Usage:\n";
+  print STDERR "\t" . basename($0) . " VMNAME \\\n";
+  print STDERR "\t\t" . "--os {opensuse|sled11|fedora|centos} \\\n";
+  print STDERR "\t\t" . "--dvd0 PATH [--dvd1 PATH] \\\n";
+  print STDERR "\t\t" . "[--flop DIR] \\\n";
+  print STDERR "\t\t" . "[--gb NUM] \\\n";
+  print STDERR "\t\t" . "[--vmxin TEMPLATEPATH]\n";
+  exit;
 }
 
 unless ( defined($autoflopdir) ) {
@@ -72,129 +95,37 @@ if (-e $dir) {
   exit 1;
 }
 
-my $hex = sprintf("%X", get_ip_byte($vmname));
-
 print("Making $vmname\n");
 make_path($dir) or die;
 
 my $flop = "$dir/autoflop.img";
 make_floppy($autoflopdir, $flop);
 
-0 == system("vmware-vdiskmanager -c -s 8Gb -a lsilogic -t 1 '$dir/$vmname.vmdk'") or die;
+0 == system("vmware-vdiskmanager -c -s ${gb}Gb -a lsilogic -t 1 '$dir/$vmname.vmdk'") or die;
 
-my $guest_os = $os;
-if ($os eq "sled11") {
-  $guest_os = "sles11";
-}
-
-open FOUT, "> $dir/$vmname.vmx" or die;
-print FOUT <<ENDVMX;
-.encoding = "UTF-8"
-config.version = "8"
-virtualHW.version = "9"
-scsi0.present = "TRUE"
-scsi0.virtualDev = "lsilogic"
-memsize = "768"
-scsi0:0.present = "TRUE"
-scsi0:0.fileName = "$vmname.vmdk"
-ide0:0.present = "TRUE"
-ide0:0.fileName = "$dvd0"
-ide0:0.deviceType = "cdrom-image"
-ethernet0.present = "TRUE"
-ethernet0.connectionType = "nat"
-ethernet0.wakeOnPcktRcv = "FALSE"
-ethernet0.addressType = "static"
-ethernet0.linkStatePropagation.enable = "TRUE"
-mks.enable3d = "FALSE"
-pciBridge0.present = "TRUE"
-pciBridge4.present = "TRUE"
-pciBridge4.virtualDev = "pcieRootPort"
-pciBridge4.functions = "8"
-pciBridge5.present = "TRUE"
-pciBridge5.virtualDev = "pcieRootPort"
-pciBridge5.functions = "8"
-pciBridge6.present = "TRUE"
-pciBridge6.virtualDev = "pcieRootPort"
-pciBridge6.functions = "8"
-pciBridge7.present = "TRUE"
-pciBridge7.virtualDev = "pcieRootPort"
-pciBridge7.functions = "8"
-vmci0.present = "TRUE"
-hpet0.present = "TRUE"
-usb.vbluetooth.startConnected = "FALSE"
-tools.syncTime = "TRUE"
-displayName = "$vmname"
-nvram = "$vmname.nvram"
-guestOS = "$guest_os"
-virtualHW.productCompatibility = "hosted"
-printers.enabled = "FALSE"
-proxyApps.publishToHost = "FALSE"
-tools.upgrade.policy = "upgradeAtPowerCycle"
-powerType.powerOff = "soft"
-powerType.powerOn = "soft"
-powerType.suspend = "soft"
-powerType.reset = "soft"
-bios.bootOrder = "hdd,cdrom,floppy"
-bios.hddOrder = "scsi0:0"
-ethernet0.address = "00:50:56:00:00:$hex"
-floppy0.present = "TRUE"
-floppy0.fileType = "file"
-floppy0.fileName = "$flop"
-floppy0.clientDevice = "FALSE"
-floppy0.readonly = "TRUE"
-usb.present = "FALSE"
-cleanShutdown = "TRUE"
-replay.supported = "FALSE"
-replay.filename = ""
-sound.present = "FALSE"
-ehci.present = "FALSE"
-serial0.present = "FALSE"
-hgfs.mapRootShare = "TRUE"
-hgfs.linkRootShare = "TRUE"
-isolation.tools.hgfs.disable = "FALSE"
-sharedFolder.maxNum = "3"
-sharedFolder0.present = "TRUE"
-sharedFolder0.enabled = "TRUE"
-sharedFolder0.readAccess = "TRUE"
-sharedFolder0.writeAccess = "TRUE"
-sharedFolder0.hostPath = "/Users/castedo/Dropbox"
-sharedFolder0.guestName = "Dropbox"
-sharedFolder0.expiration = "never"
-sharedFolder1.present = "TRUE"
-sharedFolder1.enabled = "TRUE"
-sharedFolder1.readAccess = "TRUE"
-sharedFolder1.writeAccess = "FALSE"
-sharedFolder1.hostPath = "/Users/castedo/macmnt"
-sharedFolder1.guestName = "macmnt"
-sharedFolder1.expiration = "never"
-sharedFolder2.present = "TRUE"
-sharedFolder2.enabled = "TRUE"
-sharedFolder2.readAccess = "TRUE"
-sharedFolder2.writeAccess = "TRUE"
-sharedFolder2.hostPath = "/Users/castedo/shr"
-sharedFolder2.guestName = "shr"
-sharedFolder2.expiration = "never"
-ENDVMX
-
-if (defined($dvd1)) {
-
-print FOUT <<ENDVMX;
-ide1:0.present = "TRUE"
-ide1:0.fileName = "$dvd1"
-ide1:0.deviceType = "cdrom-image"
-ENDVMX
-
-}
-
-close FOUT;
+my %values = (
+  vmname => $vmname,
+  floppy0 => $flop,
+  dvd0 => $dvd0,
+  dvd1 => $dvd1,
+  dvd1present => (defined($dvd1) ? "TRUE" : "FALSE"),
+  hexipbyte => sprintf("%X", get_ip_byte($vmname)),
+  guestos => ($os eq "sled11" or $os eq "sle11" ? "sles11" : $os)
+);
+template_substitute($vmxin, "$dir/$vmname.vmx", \%values) or die;
 
 0 == system("vmrun -T fusion start '$dir/$vmname.vmx'") or die;
 
-print("\nWait for vitual machine to boot.\n");
-print("SUSE:\n");
-print("    Installation, autoyast=floppy\n");
-print("Fedora:\n");
-print("    ESC, boot: linux ks=hd:fd0:/ks.cfg\n");
-print("CentOS:\n");
-print("    ESC, boot: linux ks=floppy\n\n");
+print("\nWait for vitual machine to boot with installation DVD.\n");
+if ($os eq "fedora") {
+  print("Fedora:\n");
+  print("    ESC, boot: linux ks=hd:fd0:/ks.cfg\n");
+} elsif ($os eq "centos") {
+  print("CentOS:\n");
+  print("    ESC, boot: linux ks=floppy\n\n");
+} else {
+  print("For SUSE:\n");
+  print("    At DVD start menu, select Installation\n");
+  print("    In Boot Options, type 'autoyast=floppy' (witout quotes)\n");
+}
 
