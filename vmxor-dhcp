@@ -49,7 +49,9 @@ if (!defined($subnet)) {
 
 ### Write /etc/hosts and Fusion dhcpd.conf additions
 
-mkdir("stage") unless -d "stage";
+if (! -d "stage") {
+  mkdir("stage") or die "Can't make stage subdirectory: $!";
+}
 open(my $hostsfh, '>', "stage/hosts.txt") or die;
 open(my $dhcpdfh, '>', "stage/dhcpd.txt") or die;
 print $hostsfh "\n### $script_name generated lines\n";
