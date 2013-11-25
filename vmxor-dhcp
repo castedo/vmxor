@@ -1,0 +1,92 @@
+#!/usr/bin/perl -w
+use strict;
+use warnings;
+use File::Basename;
+
+my $script_name = basename($0);
+my $fusiondir = "/Library/Preferences/VMware Fusion";
+
+### Parse command line arguments
+
+my $vmname = shift @ARGV;
+my $range = shift @ARGV;
+my ($from, $to) = split('-', $range);
+unless ( defined($vmname) && defined($from) && defined($to) ) {
+  print STDERR "Generate DHCP IP address configuration for virtual machines.\n";
+  print STDERR "Usage:\n";
+  print STDERR "\t$script_name VMNAME_PREFIX NUM0-NUM1\n";
+  print STDERR "\t$script_name myvm 10-19\n";
+  exit;
+}
+unless ($from > 1) {
+  print STDERR "'$from' should be a number greater than 1\n";
+  exit 1;
+}
+unless ($to >= $from) {
+  print STDERR "'$to' should be a number not less than $from\n";
+  exit 1;
+}
+
+### get the IP subnet for Fusions VNET 8 (e.g. "172.16.64.")
+
+my $subnet;
+my $networking_path = "$fusiondir/networking";
+open(my $fh, '<', $networking_path) or die "Can't open $networking_path: $!";
+my @lines = <$fh>;
+close($fh);
+my $return = qr{(?:\d+\.){3}};  # e.g. matches 172.16.64.
+my $regex = qr{^answer\s+VNET_8_HOSTONLY_SUBNET\s+($return)0\b};
+foreach (@lines) {
+  if (/$regex/) {
+    $subnet = $1;
+    last;
+  }
+}
+if (!defined($subnet)) {
+  print STDERR "Unable to parse $networking_path.\n";
+  exit 1;
+}
+
+### Write /etc/hosts and Fusion dhcpd.conf additions
+
+mkdir("stage") unless -d "stage";
+open(my $hostsfh, '>', "stage/hosts.txt") or die;
+open(my $dhcpdfh, '>', "stage/dhcpd.txt") or die;
+print $hostsfh "\n### $script_name generated lines\n";
+print $dhcpdfh "\n### $script_name generated lines\n";
+foreach my $num ($from..$to) {
+  my $hostname = "$vmname$num";
+  my $ip = "$subnet$num";
+
+  print  $hostsfh "$ip $hostname\n";
+
+  print  $dhcpdfh "host $hostname {\n";
+  printf $dhcpdfh "  hardware ethernet 00:50:56:00:00:%02x;\n", $num;
+  print  $dhcpdfh "  fixed-address $ip;\n";
+  print  $dhcpdfh "  option host-name \"$hostname\";\n";
+  print  $dhcpdfh "}\n";
+}
+print $hostsfh "### $script_name lines end\n";
+print $dhcpdfh "### $script_name lines end\n";
+close($hostsfh);
+close($dhcpdfh);
+
+### Now make the commit.sh script
+
+my $dhcpd_path = "$fusiondir/vmnet8/dhcpd.conf";
+
+open(my $shfh, '>', "stage/commit.sh") or die;
+print $shfh <<EOSH;
+cat stage/hosts.txt >> /etc/hosts
+cat stage/dhcpd.txt >> "$dhcpd_path"
+EOSH
+chmod(0755, $shfh);
+close($shfh);
+
+### Lastly, print admin instructions.
+
+print "Configuration additions for $vmname$from to $vmname$to are in stage/\n";
+print "To make your system use them do:\n";
+print "\tsudo stage/commit.sh\n";
+print "and restart VMWare Fusion.\n";
+

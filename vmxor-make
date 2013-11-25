@@ -4,20 +4,17 @@ use warnings;
 use Getopt::Long;
 use File::Basename;
 use File::Path qw(make_path);
-use File::Copy;
 use FindBin;
 
 # return the last byte of the IP address for hostname from /etc/hosts
 sub get_ip_byte {
   my ($hostname) = @_;
-
   my $regex = qr{^\s*(?:\d+\.){3}(\d+)\s+$hostname\b};
-  open(HOSTS, '<', '/etc/hosts') or die "Can't open /etc/hosts: $!";
-  my @lines = <HOSTS>;
-  close(HOSTS);
+  open(my $fh, '<', '/etc/hosts') or die "Can't open /etc/hosts: $!";
+  my @lines = <$fh>;
+  close($fh);
   foreach (@lines) { if (/$regex/) { return $1; } }
-  print STDERR "Unable to find IP address in /etc/hosts for $hostname.\n";
-  exit 1;
+  return undef;
 }
 
 # make a floppy disk image file
@@ -38,7 +35,6 @@ sub make_floppy {
 
 sub template_substitute {
   my ($infilepath, $outfilepath, $values) = @_;
-
   open(my $infh, '<', $infilepath) or return;
   my @lines = <$infh>;
   close($infh);
@@ -95,6 +91,14 @@ if (-e $dir) {
   exit 1;
 }
 
+my $ip_byte = get_ip_byte($vmname);
+if (!defined($ip_byte)) {
+  print STDERR "Unable to find IP address in /etc/hosts for $vmname.\n";
+  print STDERR "Run vmxor-dhcp to configure IP addresses,\n";
+  print STDERR " or configure IP addresses manually.\n";
+  exit 1;
+}
+
 print("Making $vmname\n");
 make_path($dir) or die;
 
@@ -109,7 +113,7 @@ my %values = (
   dvd0 => $dvd0,
   dvd1 => $dvd1,
   dvd1present => (defined($dvd1) ? "TRUE" : "FALSE"),
-  hexipbyte => sprintf("%X", get_ip_byte($vmname)),
+  hexipbyte => sprintf("%X", $ip_byte),
   guestos => ($os eq "sled11" or $os eq "sle11" ? "sles11" : $os)
 );
 template_substitute($vmxin, "$dir/$vmname.vmx", \%values) or die;

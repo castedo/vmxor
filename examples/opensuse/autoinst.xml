@@ -40,11 +40,6 @@
       <ip_forward config:type="boolean">false</ip_forward>
     </routing>
   </networking>
-  <partitioning config:type="list">
-    <drive>
-      <use>all</use>
-    </drive>
-  </partitioning>
   <runlevel>
     <default>3</default>
     <services config:type="list">
@@ -65,7 +60,6 @@
       <package>yast2-runlevel</package>
       <package>glibc-locale</package>
       <package>zypper</package>
-      <package>iputils</package>
       <package>open-vm-tools</package>
     </packages>
   </software>
