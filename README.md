@@ -52,6 +52,24 @@ probably still works with this earlier version with possibly only one minor
 tweak.
 
 
+Advanced Usage
+--------------
+
+### Fusion Shared Folders
+
+Compare `default.vmx.template` to `examples/sharedfolder.vmx.template` to see
+an example of a shared folder automatically added to a virtual machine. To use
+this non-default ".vmx.template" file, use the `--vmxin` argument of `vmxor-make`.
+
+When configuring a new virtual machine with a shared folder, you will want to do
+something like the following from script:
+
+```
+echo .host:/shr /home/linuxuser/shr vmhgfs defaults 0 0 >> /etc/fstab
+service vmtoolsd start
+mount --all -t vmhgfs
+```
+
 
 Enjoy,
 
