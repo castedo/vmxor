@@ -14,17 +14,21 @@ Example Usage
 See https://github.com/castedo/vmxor/issues for pending enhancements to make
 the example below work.
 
-### Run these commands once to setup your Mac
+### Run these commands once to setup your Mac for this example
 
 ```
 ln -s /where/you/have/DVD/iso/files/ ~/.vmxor-dvds
+pushd ~/.vmxor-dvds
+curl -C - -L -O http://download.opensuse.org/distribution/13.1/iso/openSUSE-13.1-DVD-i586.iso
+popd
 ```
 
-### To create a VM named `myvm7` just do
+
+### To create a VM named `myvm` just do
 
 ```
 cd vmxor/examples
-./vmxor-make-opensuse 7
+./vmxor-make-opensuse myvm
 ```
 
 You will be instructed to enter `autoyast=floppy` with the openSUSE
@@ -34,7 +38,7 @@ That's it! You will have a minimal openSUSE 13.1 virtual server created and runn
 
 Assuming you have `/etc/hosts` and
 `"/Library/Preferences/VMware Fusion/vmnet8/dhcpd.conf"` setup,
-from Mac Terminal you can do `ssh root@myvm7` with password `changeme`.
+from Mac Terminal you can do `ssh root@myvm` with password `changeme`.
 
 
 History

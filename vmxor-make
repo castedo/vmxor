@@ -2,10 +2,41 @@
 use strict;
 use warnings;
 use Getopt::Long;
-use Scalar::Util qw(looks_like_number);
 use File::Basename;
 use File::Path qw(make_path);
 use File::Copy;
+
+# return the last byte of the IP address for hostname
+sub get_ip_byte {
+  my ($hostname) = @_;
+
+  my $regex = qr{^\s*(?:\d+\.){3}(\d+)\s+$hostname\b};
+  open(HOSTS, '<', '/etc/hosts') or die "Can't open /etc/hosts: $!";
+  my @lines = <HOSTS>;
+  close(HOSTS);
+  foreach (@lines) {
+    if (/$regex/) {
+      return $1;
+    }
+  }
+  print STDERR "Unable to find IP address in /etc/hosts for $hostname.\n";
+  exit 1;
+}
+
+sub make_floppy {
+  my ($srcdir, $dest) = @_;
+
+  print("\nMaking $dest ...\n");
+  0 == system("dd if=/dev/zero bs=1024 count=1440 > '$dest'") or die;
+  my $dev = qx(hdiutil attach '$dest' -nomount) or die;
+  $dev = (split('\t', $dev))[0];
+  chomp($dev);
+  my $volname = "AUTOFLOP";
+  0 == system("newfs_msdos -f 1440 -v $volname $dev > /dev/null") or die;
+  0 == system("hdiutil mountvol $dev") or die;
+  0 == system("cp $srcdir/* /Volumes/$volname/") or die;
+  0 == system("hdiutil detach $dev > /dev/null") or die;
+}
 
 my $os = undef;
 my $autoflopdir = undef;
@@ -17,12 +48,12 @@ my $results = GetOptions( "os=s"   => \$os,
                           "dvd0=s" => \$dvd0,
                           "dvd1=s" => \$dvd1 );
 
-my $num = shift @ARGV;
+my $vmname = shift @ARGV;
 
-unless ( defined($num) && defined($dvd0) && defined($os) ) {
+unless ( defined($vmname) && defined($dvd0) && defined($os) ) {
     print STDERR "Make new virtual machine.\n";
     print STDERR "Usage:\n";
-    print STDERR "\t" . basename($0) . " NUM \\\n";
+    print STDERR "\t" . basename($0) . " VMNAME \\\n";
     print STDERR "\t\t" . "--os {sled11|centos|fedora|opensuse} \\\n";
     print STDERR "\t\t" . "--dvd0 PATH [--dvd1 PATH] [--flop DIR]\\\n";
     exit;
@@ -33,35 +64,23 @@ unless ( defined($autoflopdir) ) {
 }
 (-d $autoflopdir) or die "$autoflopdir directory not found.";
 (-f $dvd0) or die "$dvd0 DVD file not found.";
-looks_like_number($num) or die "$num should be a number.";
-my $vmname = "myvm$num";
-my $dest = $ENV{"HOME"} . "/Documents/Virtual Machines.localized";
-my $dir = "$dest/$vmname.vmwarevm";
+
+my $vmz = $ENV{"HOME"} . "/Documents/Virtual Machines.localized";
+my $dir = "$vmz/$vmname.vmwarevm";
 if (-e $dir) {
   print STDERR "$dir\nalready exists. Delete it manually if it's invalid.\n";
   exit 1;
 }
 
+my $hex = sprintf("%X", get_ip_byte($vmname));
+
 print("Making $vmname\n");
 make_path($dir) or die;
 
 my $flop = "$dir/autoflop.img";
-print("\nMaking $flop\n");
-0 == system("dd if=/dev/zero bs=1024 count=1440 > '$flop'") or die;
-my $dev = qx(hdiutil attach '$flop' -nomount) or die;
-$dev = (split('\t', $dev))[0];
-chomp($dev);
-print "$dev is $flop\n";
-my $volname = "AUTOFLOP";
-0 == system("newfs_msdos -f 1440 -v $volname $dev") or die;
-0 == system("hdiutil mountvol $dev") or die;
-0 == system("cp $autoflopdir/* /Volumes/$volname/") or die;
-0 == system("hdiutil detach $dev") or die;
+make_floppy($autoflopdir, $flop);
 
-print("\nMaking virtual disk\n");
 0 == system("vmware-vdiskmanager -c -s 8Gb -a lsilogic -t 1 '$dir/$vmname.vmdk'") or die;
-
-my $hex = sprintf("%X", $num);
 
 my $guest_os = $os;
 if ($os eq "sled11") {
