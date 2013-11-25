@@ -16,10 +16,10 @@ Example Usage
 ### Run these commands once to setup your Mac for this example
 
 ```
-ln -s /where/you/have/DVD/iso/files/ ~/.vmxor-dvds
+ln -s /where/you/put/DVD/iso/files/ ~/.vmxor-dvds
 cd ~/.vmxor-dvds
 curl -C - -L -O http://download.opensuse.org/distribution/13.1/iso/openSUSE-13.1-DVD-i586.iso
-cd location/of/vmxor/clone
+cd location/of/cloned/vmxor
 ./vmxor-dhcp myvm 10-99
 sudo stage/commit.sh
 ```
@@ -27,7 +27,7 @@ sudo stage/commit.sh
 ### To create a VM named `myvm10` just do
 
 ```
-cd vmxor/examples
+cd cd location/of/cloned/vmxor/examples
 ./vmxor-make-opensuse myvm10
 ```
 
@@ -35,7 +35,7 @@ You will be instructed to enter `autoyast=floppy` with the openSUSE
 Installation menu option.
 
 That's it! You will have a minimal openSUSE 13.1 virtual server created and
-running. From Terminal do `ssh root@myvm` with password `changeme`.
+running. From Terminal do `ssh root@myvm10` with password `changeme`.
 
 
 History
