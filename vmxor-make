@@ -19,11 +19,11 @@ sub get_ip_byte {
 
 # make a floppy disk image file
 sub make_floppy {
-  my ($srcdir, $dest) = @_;
+  my ($srcdir, $imgfile) = @_;
 
-  print("\nMaking $dest ...\n");
-  0 == system("dd if=/dev/zero bs=1024 count=1440 > '$dest'") or die;
-  my $dev = qx(hdiutil attach '$dest' -nomount) or die;
+  print("\nMaking $imgfile ...\n");
+  0 == system("dd if=/dev/zero bs=1024 count=1440 > '$imgfile'") or die;
+  my $dev = qx(hdiutil attach '$imgfile' -nomount) or die;
   $dev = (split('\t', $dev))[0];
   chomp($dev);
   my $volname = "AUTOFLOP";
@@ -55,6 +55,7 @@ my $gb = 8; # size in GB for virtual hard disk
 my $autoflopdir = undef;
 my $dvd0 = undef;
 my $dvd1 = undef;
+my $dest = $ENV{"HOME"} . "/Documents/Virtual Machines.localized";
 my $vmxin = $FindBin::Bin . "/default.vmx.template";
 
 my $results = GetOptions( "os=s"   => \$os,
@@ -62,6 +63,7 @@ my $results = GetOptions( "os=s"   => \$os,
                           "flop=s" => \$autoflopdir,
                           "dvd0=s" => \$dvd0,
                           "dvd1=s" => \$dvd1,
+                          "dest=s" => \$dest,
                           "vmxin=s" => \$vmxin );
 
 my $vmname = shift @ARGV;
@@ -74,6 +76,7 @@ unless ( defined($vmname) && defined($dvd0) && defined($os) ) {
   print STDERR "\t\t" . "--dvd0 PATH [--dvd1 PATH] \\\n";
   print STDERR "\t\t" . "[--flop DIR] \\\n";
   print STDERR "\t\t" . "[--gb NUM] \\\n";
+  print STDERR "\t\t" . "[--dest DESTDIR] \\\n";
   print STDERR "\t\t" . "[--vmxin TEMPLATEPATH]\n";
   exit;
 }
@@ -84,8 +87,7 @@ unless ( defined($autoflopdir) ) {
 (-d $autoflopdir) or die "$autoflopdir directory not found.";
 (-f $dvd0) or die "$dvd0 DVD file not found.";
 
-my $vmz = $ENV{"HOME"} . "/Documents/Virtual Machines.localized";
-my $dir = "$vmz/$vmname.vmwarevm";
+my $dir = "$dest/$vmname.vmwarevm";
 if (-e $dir) {
   print STDERR "$dir\nalready exists. Delete it manually if it's invalid.\n";
   exit 1;
