@@ -1,3 +1,8 @@
-../vmxor-make $1 \
+#!/bin/bash
+if [ -z "$1" ]; then 
+  echo "Usage: $0 VMNAME"
+else
+  ../vmxor-make $1 \
     --os opensuse \
     --dvd0 ~/.vmxor-dvds/openSUSE-13.1-DVD-i586.iso
+fi

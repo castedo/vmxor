@@ -9,6 +9,15 @@ As of this writing I am using vmxor with VMWare Fusion Professional 5.0.3 on
 Mac OS X 10.8.5 to create openSUSE, SUSE Linux Enterprise, Fedora and CentOS
 virtual machines.
 
+The main motivation behind vmxor is easily creating "pristine" VMs offline,
+with as little manual interaction as possible, from only text files and an
+official Linux distro DVD .iso file.
+
+In the example below, an openSUSE 13.1 VM is created from only these inputs:
+* official openSUSE-13.1-DVD-i586.iso file
+* `autoinst.xml` text file (90-ish lines)
+* `default.vmx.template` text file (60-ish lines)
+
 
 Example Usage
 -------------
@@ -69,6 +78,18 @@ echo .host:/shr /home/linuxuser/shr vmhgfs defaults 0 0 >> /etc/fstab
 service vmtoolsd start
 mount --all -t vmhgfs
 ```
+
+I've found VMWare shared folders (vmhgfs) to work more reliably and more easily
+than NFS.
+
+
+### Running scripts during Linux installation
+
+Look at `examples/vmxor-make-fancy` for an example of:
+* an extra file (`add_authorized_keys.sh`) placed on the virtual floppy
+* `add_authorized_keys.sh` adding SSH keys to root
+* an `autoinst.xml` file using more features, like calling the above script
+* use of a non-default .vmx/template file
 
 
 Enjoy,
