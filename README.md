@@ -65,6 +65,13 @@ tweak.
 Advanced Usage
 --------------
 
+### Instaling with two DVDs
+
+This is useful with SUSE Linux Enterprise where an add-on SDK DVD contains a
+significant number of typically installed packages. See
+`examples/vmxor-make-sled11` and `examples/sled11/autoinst.xml` for details.
+
+
 ### Fusion Shared Folders
 
 Compare `default.vmx.template` to `examples/sharedfolder.vmx.template` to see
@@ -91,6 +98,7 @@ Look at `examples/vmxor-make-fancy` for an example of:
 * `add_authorized_keys.sh` adding SSH keys to root
 * an `autoinst.xml` file using more features, like calling the above script
 * use of a non-default .vmx/template file
+
 
 ### Enhancing .vmx.template files
 

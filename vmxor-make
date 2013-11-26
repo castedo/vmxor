@@ -116,7 +116,7 @@ my %values = (
   dvd1 => $dvd1,
   dvd1present => (defined($dvd1) ? "TRUE" : "FALSE"),
   hexipbyte => sprintf("%X", $ip_byte),
-  guestos => ($os eq "sled11" or $os eq "sle11" ? "sles11" : $os)
+  guestos => ($os eq "sled11" || $os eq "sle11" ? "sles11" : $os)
 );
 template_substitute($vmxin, "$dir/$vmname.vmx", \%values) or die;
 
