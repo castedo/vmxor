@@ -1,0 +1,9 @@
+#!/bin/bash
+if [ -z "$1" ]; then 
+  echo "Usage: $0 VMNAME"
+else
+  ../vmxor-make $1 \
+    --os fedora \
+    --gb 12 \
+    --dvd0 ~/.vmxor-dvds/Fedora-19-i386-DVD.iso
+fi

@@ -81,6 +81,7 @@ open(my $shfh, '>', "stage/commit.sh") or die;
 print $shfh <<EOSH;
 cat stage/hosts.txt >> /etc/hosts
 cat stage/dhcpd.txt >> "$dhcpd_path"
+echo Now restart VMWare Fusion.
 EOSH
 chmod(0755, $shfh);
 close($shfh);

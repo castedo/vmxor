@@ -25,6 +25,7 @@ Example Usage
 ### Run these commands once to setup your Mac for this example
 
 ```
+export PATH=$PATH:/Applications/VMware\ Fusion.app/Contents/Library/
 ln -s /where/you/put/DVD/iso/files/ ~/.vmxor-dvds
 cd ~/.vmxor-dvds
 curl -C - -L -O http://download.opensuse.org/distribution/13.1/iso/openSUSE-13.1-DVD-i586.iso
@@ -36,7 +37,7 @@ sudo stage/commit.sh
 ### To create a VM named `myvm10` just do
 
 ```
-cd cd location/of/cloned/vmxor/examples
+cd location/of/cloned/vmxor/examples
 ./vmxor-make-opensuse myvm10
 ```
 
@@ -44,7 +45,7 @@ You will be instructed to enter `autoyast=floppy` with the openSUSE
 Installation menu option.
 
 That's it! You will have a minimal openSUSE 13.1 virtual server created and
-running. From Terminal do `ssh root@myvm10` with password `changeme`.
+running. From Terminal do `ssh root@myvm10` and use password `changeme`.
 
 
 History
@@ -90,6 +91,14 @@ Look at `examples/vmxor-make-fancy` for an example of:
 * `add_authorized_keys.sh` adding SSH keys to root
 * an `autoinst.xml` file using more features, like calling the above script
 * use of a non-default .vmx/template file
+
+### Enhancing .vmx.template files
+
+One way to make an enhanced .vmx.template file is to find the .vmx file of an
+existing VM and simply diff it with `default.vmx.template`. You'll get an idea
+of what lines to add. Normally .vmx files are inside the subdirectories in
+`~/Documents/Virtual Machines.localized`.
+
 
 
 Enjoy,
