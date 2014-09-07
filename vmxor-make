@@ -123,17 +123,4 @@ template_substitute($vmxin, "$dir/$vmname.vmx", \%values) or die;
 0 == system("vmrun -T fusion start '$dir/$vmname.vmx'") or die;
 
 print("\nWait for vitual machine to boot with installation DVD.\n");
-if ($os eq "fedora") {
-  print("For Fedora:\n");
-  print("    At DVD start menu, hit ESC\n");
-  print("    In boot prompt type `linux ks=hd:fd0:/ks.cfg`\n");
-} elsif ($os eq "centos") {
-  print("For CentOS:\n");
-  print("    At DVD start menu, hit ESC\n");
-  print("    In boot prompt type `linux ks=floppy`\n");
-} else {
-  print("For SUSE:\n");
-  print("    At DVD start menu, select Installation\n");
-  print("    In Boot Options, type 'autoyast=floppy' (witout quotes)\n");
-}
 

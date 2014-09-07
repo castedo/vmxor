@@ -5,4 +5,6 @@ else
   ../vmxor-make $1 \
     --os opensuse \
     --dvd0 ~/.vmxor-dvds/openSUSE-13.1-DVD-i586.iso
+  echo At DVD start menu, select Installation.
+  echo Boot Options, type \'autoyast=floppy\' (witout quotes)
 fi

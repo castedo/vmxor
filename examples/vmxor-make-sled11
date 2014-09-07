@@ -6,4 +6,6 @@ else
     --os sled11 \
     --dvd0 ~/.vmxor-dvds/SLED-11-SP3-DVD-i586-GM-DVD1.iso \
     --dvd1 ~/.vmxor-dvds/SLE-11-SP3-SDK-DVD-i586-GM-DVD1.iso
+  echo At DVD start menu, select Installation.
+  echo Boot Options, type \'autoyast=floppy\' (witout quotes)
 fi
