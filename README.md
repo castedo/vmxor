@@ -1,17 +1,17 @@
 vmxor
 =====
 
-vmxor creates virtual machines on Mac OS X with VMWare Fusion. vmxor has no
-other dependencies. `vmxor-make` and `vmxor-dhcp` are just simple Perl scripts,
-roughly 100 lines each.
+vmxor creates "pristine" virtual machines on Mac OS X with VMWare Fusion.
 
-As of this writing I am using vmxor with VMWare Fusion Professional 5.0.3 on
-Mac OS X 10.8.5 to create openSUSE, SUSE Linux Enterprise, Fedora and CentOS
-virtual machines.
+Features:
+* no dependencies other than VMWare Fusion and Mac OS X 
+* VM creation is determined solely from text files and official Linux distro DVD .iso files
+* `vmxor-make` and `vmxor-dhcp` are just simple Perl scripts, roughly 100 lines each
+* only a trivial amount of manual interaction required
 
-The main motivation behind vmxor is easily creating "pristine" VMs offline,
-with as little manual interaction as possible, from only text files and an
-official Linux distro DVD .iso file.
+As of this writing I am using vmxor with VMWare Fusion Professional 5.0 on Mac
+OS X 10.8.5 to create Ubuntu 14.04 LTS, openSUSE, SUSE Linux Enterprise, Fedora
+and CentOS virtual machines.
 
 In the example below, an openSUSE 13.1 VM is created from only these inputs:
 * official openSUSE-13.1-DVD-i586.iso file
