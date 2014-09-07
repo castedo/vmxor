@@ -1,0 +1,12 @@
+#!/bin/bash
+if [ -z "$1" ]; then 
+  echo "Usage: $0 VMNAME"
+else
+  ../vmxor-make $1 \
+    --os ubuntu-64 \
+    --flop ubuntu \
+    --gb 8 \
+    --dvd0 ~/.vmxor-dvds/ubuntu-14.04.1-server-amd64.iso
+  echo Hit ESC, F6, ESC at DVD start menu.
+  echo Append \'ks=floppy\' to boot options and hit ENTER.
+fi
