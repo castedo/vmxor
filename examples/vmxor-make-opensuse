@@ -3,8 +3,8 @@ if [ -z "$1" ]; then
   echo "Usage: $0 VMNAME"
 else
   ../vmxor-make $1 \
-    --os opensuse \
-    --dvd0 ~/.vmxor-dvds/openSUSE-13.1-DVD-i586.iso
+    --os opensuse-64 \
+    --dvd0 ~/.vmxor-dvds/openSUSE-13.1-DVD-x86_64.iso
   echo At DVD start menu, select Installation.
-  echo Boot Options, type \'autoyast=floppy\' (witout quotes)
+  echo Boot Options, type \'autoyast=floppy\' witout quotes
 fi

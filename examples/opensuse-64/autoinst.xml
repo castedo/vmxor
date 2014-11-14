@@ -60,7 +60,7 @@
       <package>yast2-runlevel</package>
       <package>glibc-locale</package>
       <package>zypper</package>
-      <package>open-vm-tools</package>
+      <package>iputils</package>
     </packages>
   </software>
   <timezone>
