@@ -2,7 +2,7 @@
 if [ -z "$1" ]; then 
   echo "Usage: $0 VMNAME"
 else
-  ../../vmxor/vmxor-make $1 \
+  ../vmxor-make $1 \
     --os sled11 \
     --dvd0 ~/.vmxor-dvds/SLED-11-SP3-DVD-i586-GM-DVD1.iso \
     --dvd1 ~/.vmxor-dvds/SLE-11-SP3-SDK-DVD-i586-GM-DVD1.iso

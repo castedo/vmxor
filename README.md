@@ -9,9 +9,9 @@ Features:
 * `vmxor-make` and `vmxor-dhcp` are just simple Perl scripts, roughly 100 lines each
 * only a trivial amount of manual interaction required
 
-As of this writing I am using vmxor with VMWare Fusion Professional 5.0 on Mac
-OS X 10.8.5 to create Ubuntu 14.04 LTS, openSUSE, SUSE Linux Enterprise, Fedora
-and CentOS virtual machines.
+As of this writing I am using vmxor with VMWare Fusion Professional 7.0 on Mac
+OS X 10.10 to create CentOS 7, Ubuntu 14.04 LTS, openSUSE and SUSE Linux
+Enterprise virtual machines.
 
 In the example below, an openSUSE 13.1 VM is created from only these inputs:
 * official openSUSE-13.1-DVD-i586.iso file

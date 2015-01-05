@@ -1,0 +1,12 @@
+#!/bin/bash
+if [ -z "$1" ]; then 
+  echo "Usage: $0 VMNAME"
+else
+  ../vmxor-make $1 \
+    --os centos-64 \
+    --gb 8 \
+    --dvd0 ~/.vmxor-dvds/CentOS-7.0-1406-x86_64-DVD.iso
+  echo At DVD start menu, hit ESC
+  echo In boot prompt type \"linux inst.ks=hd:fd0\"
+  echo In boot prompt type \`linux ks=hd:fd0:/ks.cfg\`
+fi

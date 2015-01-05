@@ -1,0 +1,11 @@
+#!/bin/bash
+if [ -z "$1" ]; then 
+  echo "Usage: $0 VMNAME"
+else
+  ../vmxor-make $1 \
+    --os sles12-64 \
+    --dvd0 ~/.vmxor-dvds/SLE-12-Desktop-DVD-x86_64-GM-DVD1.iso \
+    --dvd1 ~/.vmxor-dvds/SLE-12-SDK-DVD-x86_64-GM-DVD1.iso
+  echo At DVD start menu, select Installation.
+  echo Boot Options, type \'autoyast=floppy\' witout quotes
+fi
