@@ -9,13 +9,13 @@ Features:
 * `vmxor-make` and `vmxor-dhcp` are just simple Perl scripts, roughly 100 lines each
 * only a trivial amount of manual interaction required
 
-As of this writing I am using vmxor with VMWare Fusion Professional 7.0 on Mac
-OS X 10.10 to create CentOS 7, Ubuntu 14.04 LTS, openSUSE and SUSE Linux
-Enterprise virtual machines.
+As of this writing I am using vmxor with VMWare Fusion Professional 7.1 on Mac
+OS X 10.10 to create CentOS 7 virtual machines. In the past I've used vmxor to
+create Ubuntu 14.04 LTS, openSUSE and SUSE Linux Enterprise virtual machines.
 
-In the example below, an openSUSE 13.1 VM is created from only these inputs:
-* official openSUSE-13.1-DVD-i586.iso file
-* `autoinst.xml` text file (90-ish lines)
+The example below is roughly what I do to create CentOS 7 VMs, using only these inputs:
+* official CentOS-7-x86_64-DVD-1511.iso file
+* `ks.cfg` text file (45-ish lines)
 * `default.vmx.template` text file (60-ish lines)
 
 
@@ -28,8 +28,8 @@ Example Usage
 export PATH=$PATH:/Applications/VMware\ Fusion.app/Contents/Library/
 ln -s /where/you/put/DVD/iso/files/ ~/.vmxor-dvds
 cd ~/.vmxor-dvds
-curl -C - -L -O http://download.opensuse.org/distribution/13.1/iso/openSUSE-13.1-DVD-i586.iso
-cd location/of/cloned/vmxor
+curl -C - -L -O http://centos.mirror.constant.com/7/isos/x86_64/CentOS-7-x86_64-DVD-1511.iso
+cd location/of/this/source/code/
 ./vmxor-dhcp myvm 10-99
 sudo stage/commit.sh
 ```
@@ -37,14 +37,14 @@ sudo stage/commit.sh
 ### To create a VM named `myvm10` just do
 
 ```
-cd location/of/cloned/vmxor/examples
-./vmxor-make-opensuse myvm10
+cd location/of/this/source/code/examples/
+./vmxor-make-centos myvm10
 ```
 
-You will be instructed to enter `autoyast=floppy` with the openSUSE
-Installation menu option.
+You will be instructed to enter `linux ks=hd:fd0` to start automated CentOS 7
+installation.
 
-That's it! You will have a minimal openSUSE 13.1 virtual server created and
+That's it! You will have a minimal CentOS 7 virtual server created and
 running. From Terminal do `ssh root@myvm10` and use password `changeme`.
 
 
@@ -65,13 +65,6 @@ tweak.
 Advanced Usage
 --------------
 
-### Instaling with two DVDs
-
-This is useful with SUSE Linux Enterprise where an add-on SDK DVD contains a
-significant number of typically installed packages. See
-`examples/vmxor-make-sled11` and `examples/sled11/autoinst.xml` for details.
-
-
 ### Fusion Shared Folders
 
 Compare `default.vmx.template` to `examples/sharedfolder.vmx.template` to see
@@ -87,17 +80,10 @@ service vmtoolsd start
 mount --all -t vmhgfs
 ```
 
-I've found VMWare shared folders (vmhgfs) to work more reliably and more easily
-than NFS.
-
-
-### Running scripts during Linux installation
-
-Look at `examples/vmxor-make-fancy` for an example of:
-* an extra file (`add_authorized_keys.sh`) placed on the virtual floppy
-* `add_authorized_keys.sh` adding SSH keys to root
-* an `autoinst.xml` file using more features, like calling the above script
-* use of a non-default .vmx/template file
+At one point I found VMWare shared folders (vmhgfs) to work more reliably and
+more easily than NFS. But then Linux kernel updates and vmhgfs driver issues
+caused upgrade head-aches. I've since switched back to using NFS and not had
+any problems since.
 
 
 ### Enhancing .vmx.template files
